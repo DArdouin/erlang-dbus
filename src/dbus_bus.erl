@@ -144,8 +144,12 @@ handle_info({setup, BusId}, State) ->
 handle_info({reply, Ref, {error, Reason}}, #state{conn_name=Ref}=State) ->
     {stop, {error, Reason}, State};
 
-handle_info({dbus_signal, Msg, Conn}, #state{conn=Conn, signal_handlers=_Handlers}=State) ->
+handle_info({dbus_signal, Msg, Conn}, #state{conn=Conn}=State) ->
     ?debug("Ignore signal ~p~n", [Msg]),
+    {noreply, State};
+
+handle_info({dbus_signal, Msg, _}, #state{conn=Conn}=State) ->
+    ?error("Received signal ~p~n from conn ~p, expected ~p", [Msg, Conn]),
     {noreply, State};
 
 handle_info({'EXIT', Pid, Reason}, State) ->
